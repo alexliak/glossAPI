@@ -37,3 +37,22 @@ wheels/
 .installed.cfg
 *.egg
 
+
+# Virtual environment
+venv/
+
+# IDE files
+.idea/
+
+# Log files
+*.log
+
+# Test output files
+processed_output/
+
+# Data files
+*.parquet
+
+# Test directories
+downloads/
+test_pdf_input/
