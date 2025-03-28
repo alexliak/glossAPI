@@ -58,6 +58,24 @@ async def download_pdfs(metadata_dict, semaphore, visited, indexes, args, progre
                 progress_report[pdf_file_name[:-4]] = metadata
             else:
                 logging.warning(f"Failed to download file for metadata: {metadata}")
+                # Save failed URLs to a file for later analysis
+                with open(os.path.join(args.output, 'failed_downloads.json'), 'a+') as fail_file:
+                    # Seek to beginning to read content
+                    fail_file.seek(0)
+                    try:
+                        # Try to read existing content
+                        content = fail_file.read().strip()
+                        failed_urls = json.loads(content) if content else {}
+                    except json.JSONDecodeError:
+                        # If file is empty or invalid JSON
+                        failed_urls = {}
+                    # Add new failed URL
+                    failed_urls[url] = metadata
+                    # Seek to beginning to overwrite content
+                    fail_file.seek(0)
+                    fail_file.truncate()
+                    # Write updated content
+                    json.dump(failed_urls, fail_file, ensure_ascii=False, indent=4)
                 if retry > 0:
                     retries[url] = metadata
     if retries and retry > 0:
@@ -98,7 +116,7 @@ async def download_pdf(index, metadata, pdf_url, semaphore, args, user_agent, re
         pdf_url = f"http://{pdf_url}"
     sleep_time, file_type, request_type = args.sleep, args.type, args.req
     async with semaphore:
-        timeout = aiohttp.ClientTimeout(total=60)
+        timeout = aiohttp.ClientTimeout(total=120)  # Increased timeout to 120 seconds
         async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False), timeout=timeout) as session:
             # Randomized sleep time between args.sleep and args.sleep + 2 (better for passing bot detection)
             await asyncio.sleep(random.uniform(sleep_time, sleep_time + 2))  
@@ -108,10 +126,9 @@ async def download_pdf(index, metadata, pdf_url, semaphore, args, user_agent, re
                 await setup_session(session, pdf_url, headers)
                 requester = getattr(session, request_type)  # sets session type as either session.get or session.post
                 async with requester(pdf_url, headers=headers, allow_redirects=True) as response:
-                    if response.status in (301, 302):
-                        logging.error(f"Redirected: {pdf_url} to {response.headers['Location']}. Status code: {response.status}")
-                        return (False, metadata, file_name)
-                    elif response.status == 200:
+                    # Since allow_redirects=True, we don't need to check for 301/302 status codes
+                    # as the client will automatically follow redirects
+                    if response.status == 200:
                         content = await response.read()
                         if args.output: output_path = args.output
                         await write_file(file_name, content, output_path)
@@ -131,6 +148,8 @@ async def download_pdf(index, metadata, pdf_url, semaphore, args, user_agent, re
 
 #Function that writes downloaded content to a file 
 async def write_file(filename, content, output_path = "./"):
+    # Ensure output directory exists
+    os.makedirs(output_path, exist_ok=True)
     path_to_file = os.path.join(output_path, filename)
     async with aiofiles.open(path_to_file, 'wb') as file:
         await file.write(content)
@@ -254,10 +273,15 @@ async def main():
         raise
     finally:
         #Write progress report to a JSON file 
-        progress_report_path = os.path.join(args.little_potato, 'progress_report.json')
-        with open(progress_report_path, 'w') as file:
-            json.dump(progress_report, file, ensure_ascii=False, indent=4)
-        logging.info("Progress report written to progress_report.json")
+        try:
+            # Ensure output directory exists
+            os.makedirs(args.little_potato, exist_ok=True)
+            progress_report_path = os.path.join(args.little_potato, 'progress_report.json')
+            with open(progress_report_path, 'w') as file:
+                json.dump(progress_report, file, ensure_ascii=False, indent=4)
+            logging.info("Progress report written to progress_report.json")
+        except Exception as e:
+            logging.error(f"Failed to write progress report: {e}")
 
 #Entry point of Downloader 
 if __name__ == "__main__":
