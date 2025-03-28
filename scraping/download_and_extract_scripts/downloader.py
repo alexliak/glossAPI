@@ -107,7 +107,7 @@ async def download_pdf(index, metadata, pdf_url, semaphore, args, user_agent, re
             try:
                 await setup_session(session, pdf_url, headers)
                 requester = getattr(session, request_type)  # sets session type as either session.get or session.post
-                async with requester(pdf_url, headers=headers, allow_redirects=False) as response:
+                async with requester(pdf_url, headers=headers, allow_redirects=True) as response:
                     if response.status in (301, 302):
                         logging.error(f"Redirected: {pdf_url} to {response.headers['Location']}. Status code: {response.status}")
                         return (False, metadata, file_name)
