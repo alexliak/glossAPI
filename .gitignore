@@ -1,41 +1,29 @@
-tokenization/preprocessing/preprocessor
-tokenization/preprocessing/text
-tokenization/preprocessing/text.txt
-tokenization/preprocessing/re_text.txt
-tokenization/new.bin
-tokenization/new.txt
-tokenization/text.bin
-tokenization/text.txt
-tokenization/tokenize
-tokenization/tokenizer
-.gitignore
-tokenization/freqency.txt
-tokenization/paper_1.txt
-tokenization/cleaned_filtered_extracted_txt
-tokenization/cleaned_filtered_extracted_txt_v2/*
-gutenberg_books
-clean_books
-# Python build artifacts
-__pycache__/
-*.py[cod]
-*.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+# Python virtual environment
 venv/
 
+# Logs
 *.log
+logs/
+**/logs/
+
+# Downloaded files
+downloads/
+**/downloads/
+
+# Build files
+build.gradle
+
+# IDE files
+.idea/
+
+# Processed output
+processed_output/
+
+# Temporary files
+test_urls.parquet
+
+# Custom scripts
+scraping/download_and_extract_scripts/run_downloader.sh
+
+# Source directory if it's not part of the original
+src/
