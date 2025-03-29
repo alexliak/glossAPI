@@ -27,3 +27,5 @@ scraping/download_and_extract_scripts/run_downloader.sh
 
 # Source directory if it's not part of the original
 src/
+__pycache__/
+*.pyc
