@@ -34,15 +34,15 @@ logging.basicConfig(level=logging.INFO)
 # Initialize Corpus with input and output directories
 corpus = Corpus(
     input_dir="/path/to/documents",
-    output_dir="/path/to/output",
-    metadata_path="/path/to/metadata.parquet",  # Optional
-    annotation_mapping={
-        'Κεφάλαιο': 'chapter', # i.e. a label in document_type column : references text type to be annotated chapter or text for now
-        # Add more mappings as needed
-    }
+    output_dir="/path/to/output"
+    # metadata_path="/path/to/metadata.parquet",  # Optional
+    # annotation_mapping={
+    #     'Κεφάλαιο': 'chapter', # i.e. a label in document_type column : references text type to be annotated chapter or text for now
+    #     # Add more mappings as needed
+    # }
 )
 
-# Step 1: Filter documents (quality control)
+# Step 1: Extract documents (with quality control)
 corpus.extract()
 
 # Step 2: Extract sections from filtered documents
